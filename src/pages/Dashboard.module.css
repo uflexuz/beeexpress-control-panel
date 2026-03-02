@@ -1,0 +1,88 @@
+.page { display: flex; flex-direction: column; gap: 24px; }
+
+.pageHeader { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.pageTitle { font-size: 26px; font-weight: 800; }
+.periodTabs { display: flex; background: var(--bg); border-radius: var(--radius-md); padding: 4px; border: 1px solid var(--border); }
+.periodTab { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
+.periodTab:hover { color: var(--text); }
+.periodTabActive { background: var(--text); color: #fff; font-weight: 600; }
+
+/* Stats Grid */
+.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.statCard {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 18px 20px; display: flex; align-items: center; gap: 14px;
+  transition: box-shadow 0.15s;
+}
+.statCard:hover { box-shadow: 0 4px 16px var(--shadow); }
+.statIcon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.statInfo { flex: 1; min-width: 0; }
+.statValue { font-size: 20px; font-weight: 800; }
+.statLabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.statChange { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+
+/* Charts */
+.chartsRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.chartCard {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+.chartCard h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+/* Bottom tables */
+.bottomRow { display: grid; grid-template-columns: 1fr auto; gap: 16px; }
+.tableCard {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tableHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+}
+.tableHeader h3 { font-size: 15px; font-weight: 700; }
+.viewAll { font-size: 13px; color: var(--info); font-weight: 500; }
+.viewAll:hover { text-decoration: underline; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table thead th {
+  padding: 10px 16px; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--separator); text-align: left;
+}
+.table tbody tr { border-bottom: 1px solid var(--separator); transition: background 0.1s; }
+.table tbody tr:last-child { border-bottom: none; }
+.table tbody tr:hover { background: var(--separator); }
+.table tbody td { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
+.mono { font-weight: 600; font-variant-numeric: tabular-nums; }
+.muted { color: var(--text-muted); }
+
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+
+/* Pending restaurants */
+.pendingList { padding: 8px; }
+.pendingItem {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  transition: background 0.1s;
+}
+.pendingItem:hover { background: var(--separator); }
+.pendingAvatar {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: var(--warning-bg); color: var(--warning);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px;
+}
+.pendingInfo { flex: 1; min-width: 0; }
+.pendingName { font-weight: 600; font-size: 14px; }
+.pendingOwner { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.emptyPending { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 13px; }
+
+@media (max-width: 1200px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) {
+  .chartsRow, .bottomRow { grid-template-columns: 1fr; }
+  .tableCard { max-width: 100% !important; }
+}
+@media (max-width: 600px) { .statsGrid { grid-template-columns: 1fr; } }

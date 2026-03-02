@@ -1,0 +1,44 @@
+.page { display: flex; flex-direction: column; gap: 24px; }
+.pageHeader { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.pageTitle { font-size: 26px; font-weight: 800; }
+.periodTabs { display: flex; background: var(--bg); border-radius: var(--radius-md); padding: 4px; border: 1px solid var(--border); }
+.periodTab { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
+.periodTab:hover { color: var(--text); }
+.periodTabActive { background: var(--text); color: #fff; font-weight: 600; }
+
+/* Cards */
+.cardsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 22px; display: flex; align-items: center; gap: 16px;
+  transition: box-shadow 0.15s;
+}
+.card:hover { box-shadow: 0 4px 16px var(--shadow); }
+.cardIcon { width: 50px; height: 50px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cardValue { font-size: 22px; font-weight: 800; }
+.cardLabel { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.cardFull { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+/* Chart */
+.chartCard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; }
+.chartCard h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+/* Table */
+.tableCard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.tableHeader { padding: 18px 22px; border-bottom: 1px solid var(--border); }
+.tableHeader h3 { font-size: 15px; font-weight: 700; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table thead th { padding: 12px 18px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--separator); text-align: left; white-space: nowrap; }
+.table tbody tr { border-bottom: 1px solid var(--separator); transition: background 0.1s; }
+.table tbody tr:last-child { border-bottom: none; }
+.table tbody tr:hover { background: var(--separator); }
+.table tbody td { padding: 14px 18px; font-size: 13px; white-space: nowrap; }
+.mono { font-weight: 600; font-variant-numeric: tabular-nums; }
+.bold { font-weight: 600; }
+.muted { color: var(--text-muted); }
+
+.statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+@media (max-width: 1000px) { .cardsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .cardsGrid { grid-template-columns: 1fr; } }
