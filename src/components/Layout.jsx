@@ -48,6 +48,15 @@ export default function Layout() {
           {!collapsed && <span className={s.brandText}>Bee Express<small>Control Panel</small></span>}
         </div>
 
+        {/* Collapse toggle */}
+        <button
+          className={`${s.collapseBtn} ${collapsed ? s.collapseBtnRotated : ''}`}
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? 'Yoyish' : "Yig'ish"}
+        >
+          <ChevronLeft size={16} />
+        </button>
+
         {/* Nav */}
         <nav className={s.nav}>
           {NAV.map(({ to, icon: Icon, label, end }) => (
@@ -81,13 +90,6 @@ export default function Layout() {
           </button>
         </div>
 
-        {/* Collapse toggle */}
-        <button
-          className={`${s.collapseBtn} ${collapsed ? s.collapseBtnRotated : ''}`}
-          onClick={() => setCollapsed((c) => !c)}
-        >
-          <ChevronLeft size={16} />
-        </button>
       </aside>
 
       {/* Main */}
