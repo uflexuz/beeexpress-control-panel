@@ -10,8 +10,27 @@ import Couriers from './pages/Couriers';
 import Finance from './pages/Finance';
 import Settings from './pages/Settings';
 
+/** Sessiya tiklanayotganda ko'rsatiladigan yengil splash (flicker'ni oldini oladi). */
+function Splash() {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--color-bg-secondary)',
+      }}
+    >
+      <div style={{ fontSize: 40, animation: 'bx-pulse 1.4s var(--ease) infinite' }}>🐝</div>
+    </div>
+  );
+}
+
+/** Tokensiz foydalanuvchini /login ga yo'naltiradigan route guard. */
 function PrivateRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return <Splash />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }

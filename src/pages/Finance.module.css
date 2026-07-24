@@ -1,44 +1,96 @@
-.page { display: flex; flex-direction: column; gap: 24px; }
-.pageHeader { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.pageTitle { font-size: 26px; font-weight: 800; }
-.periodTabs { display: flex; background: var(--bg); border-radius: var(--radius-md); padding: 4px; border: 1px solid var(--border); }
-.periodTab { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
-.periodTab:hover { color: var(--text); }
-.periodTabActive { background: var(--text); color: #fff; font-weight: 600; }
+/* Moliya — sahifa layout. Umumiy elementlar (jadval, pill, tugma, karta,
+   skeleton, bo'sh holat, forma) index.css utility klasslaridan olinadi. */
 
-/* Cards */
-.cardsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.card {
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 22px; display: flex; align-items: center; gap: 16px;
-  transition: box-shadow 0.15s;
+.page { display: flex; flex-direction: column; gap: var(--space-6); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+
+/* Tab bar (chip'lar) */
+.tabBar { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* Ro'yxat bloki */
+.block { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.listHead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.listTitle { display: flex; align-items: center; gap: var(--space-3); font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; height: 24px; padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-secondary); color: var(--color-text-secondary);
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
 }
-.card:hover { box-shadow: 0 4px 16px var(--shadow); }
-.cardIcon { width: 50px; height: 50px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.cardValue { font-size: 22px; font-weight: 800; }
-.cardLabel { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-.cardFull { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
 
-/* Chart */
-.chartCard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; }
-.chartCard h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+/* To'lovlar jadvali qo'shimchalari */
+.orderRef { font-weight: 700; font-variant-numeric: tabular-nums; }
+.subRef { margin-top: 2px; font-size: 11px; color: var(--color-text-muted); font-family: var(--font-mono); }
 
-/* Table */
-.tableCard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.tableHeader { padding: 18px 22px; border-bottom: 1px solid var(--border); }
-.tableHeader h3 { font-size: 15px; font-weight: 700; }
+/* Audit ro'yxati */
+.auditList {
+  display: flex; flex-direction: column;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.auditRow {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-separator);
+}
+.auditRow:last-child { border-bottom: none; }
+.auditIco {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary); color: var(--color-text-secondary);
+}
+.auditBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.auditTop { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.auditAction { font-weight: 700; font-size: 14px; }
+.auditTarget {
+  font-size: 12px; font-weight: 600;
+  padding: 2px var(--space-2); border-radius: var(--radius-pill);
+  background: var(--color-bg-secondary); color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+.auditDesc { font-size: 13px; color: var(--color-text-secondary); word-break: break-word; }
+.auditMeta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-top: 2px; }
+.auditActor { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-text-muted); }
+.auditWhen { font-size: 12px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 
-.table { width: 100%; border-collapse: collapse; }
-.table thead th { padding: 12px 18px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--separator); text-align: left; white-space: nowrap; }
-.table tbody tr { border-bottom: 1px solid var(--separator); transition: background 0.1s; }
-.table tbody tr:last-child { border-bottom: none; }
-.table tbody tr:hover { background: var(--separator); }
-.table tbody td { padding: 14px 18px; font-size: 13px; white-space: nowrap; }
-.mono { font-weight: 600; font-variant-numeric: tabular-nums; }
-.bold { font-weight: 600; }
-.muted { color: var(--text-muted); }
+/* Refund forma */
+.refundWrap { max-width: 640px; }
+.refundHead { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.refundIco {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light); color: var(--color-on-accent);
+}
+.refundTitle { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
 
-.statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.full { grid-column: 1 / -1; }
+.formActions { margin-top: var(--space-5); display: flex; justify-content: flex-end; }
 
-@media (max-width: 1000px) { .cardsGrid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .cardsGrid { grid-template-columns: 1fr; } }
+/* Ikonkali forma label (global .field__label ustiga qo'shiladi) */
+.lbl { display: inline-flex; align-items: center; gap: 6px; }
+.lbl svg { flex-shrink: 0; color: var(--color-text-muted); }
+
+/* Alert (natija) */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  margin-bottom: var(--space-5);
+}
+.alertOk { background: var(--color-success-bg); color: var(--color-success); }
+.alertErr { background: var(--color-error-bg); color: var(--color-error); }
+
+/* Yangilash ikonkasi aylanishi */
+.spin { animation: fin-spin 0.9s linear infinite; }
+@keyframes fin-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .formGrid { grid-template-columns: 1fr; }
+}

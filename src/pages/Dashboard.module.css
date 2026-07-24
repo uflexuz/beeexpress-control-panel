@@ -1,88 +1,117 @@
-.page { display: flex; flex-direction: column; gap: 24px; }
+.page { display: flex; flex-direction: column; gap: var(--space-6); }
 
-.pageHeader { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.pageTitle { font-size: 26px; font-weight: 800; }
-.periodTabs { display: flex; background: var(--bg); border-radius: var(--radius-md); padding: 4px; border: 1px solid var(--border); }
-.periodTab { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
-.periodTab:hover { color: var(--text); }
-.periodTabActive { background: var(--text); color: #fff; font-weight: 600; }
+/* Sarlavha */
+.pageHeader { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4); }
+.pageTitle { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; }
+.spin { animation: bx-spin 0.9s linear infinite; }
+@keyframes bx-spin { to { transform: rotate(360deg); } }
 
-/* Stats Grid */
-.statsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+/* ---- KPI (stat) kartalar ---- */
+.statsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-4); }
 .statCard {
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 18px 20px; display: flex; align-items: center; gap: 14px;
-  transition: box-shadow 0.15s;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex; align-items: center; gap: var(--space-4);
+  min-height: 96px;
+  transition: box-shadow var(--dur) var(--ease);
 }
-.statCard:hover { box-shadow: 0 4px 16px var(--shadow); }
-.statIcon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.statCard:hover { box-shadow: var(--shadow-md); }
+.statIcon {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 .statInfo { flex: 1; min-width: 0; }
-.statValue { font-size: 20px; font-weight: 800; }
-.statLabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.statChange { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.statValue {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.statLabel { font-size: 13px; color: var(--color-text-muted); margin-top: var(--space-2); }
+.retryLink {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: var(--space-2);
+  font-size: 12px; font-weight: 600; color: var(--color-text-secondary);
+}
+.retryLink:hover { color: var(--color-text); }
 
-/* Charts */
-.chartsRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.chartCard {
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 20px 24px;
+/* ---- Grafiklar ---- */
+.chartsRow { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--space-4); }
+.chartCard, .tableCard {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
 }
-.chartCard h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
-
-/* Bottom tables */
-.bottomRow { display: grid; grid-template-columns: 1fr auto; gap: 16px; }
-.tableCard {
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  overflow: hidden;
+.cardHead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
-.tableHeader {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 18px 22px; border-bottom: 1px solid var(--border);
-}
-.tableHeader h3 { font-size: 15px; font-weight: 700; }
-.viewAll { font-size: 13px; color: var(--info); font-weight: 500; }
+.cardTitle { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.cardSub { font-size: 13px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.viewAll { font-size: 13px; font-weight: 600; color: var(--color-info); }
 .viewAll:hover { text-decoration: underline; }
 
-.table { width: 100%; border-collapse: collapse; }
+.chartSkeleton { width: 100%; height: 260px; border-radius: var(--radius-md); }
+
+/* ---- Donut ---- */
+.donutWrap { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+.donutChart { position: relative; width: 200px; height: 200px; flex-shrink: 0; }
+.donutCenter {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; pointer-events: none;
+}
+.donutCenterValue { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.donutCenterLabel { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.legend { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: var(--space-2); }
+.legendItem { display: flex; align-items: center; gap: var(--space-2); font-size: 13px; }
+.legendDot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legendName { flex: 1; min-width: 0; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legendVal { font-weight: 700; font-variant-numeric: tabular-nums; }
+.legendPct { width: 40px; text-align: right; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+/* ---- Jadval ---- */
+.tableWrap { width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table thead th {
-  padding: 10px 16px; font-size: 11px; font-weight: 600;
-  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--separator); text-align: left;
+  padding: var(--space-3) var(--space-4);
+  text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-separator); white-space: nowrap;
 }
-.table tbody tr { border-bottom: 1px solid var(--separator); transition: background 0.1s; }
-.table tbody tr:last-child { border-bottom: none; }
-.table tbody tr:hover { background: var(--separator); }
-.table tbody td { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
-.mono { font-weight: 600; font-variant-numeric: tabular-nums; }
-.muted { color: var(--text-muted); }
-
+.table tbody td { padding: var(--space-4); border-bottom: 1px solid var(--color-separator); white-space: nowrap; vertical-align: middle; }
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr { transition: background var(--dur-fast) var(--ease); }
+.table tbody tr:hover { background: var(--color-bg-hover); }
+.right { text-align: right; }
+.mono { font-variant-numeric: tabular-nums; font-weight: 600; }
+.bold { font-weight: 600; }
+.muted { color: var(--color-text-muted); }
 .badge {
-  display: inline-block; padding: 3px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; white-space: nowrap;
+  display: inline-flex; align-items: center; height: 24px; padding: 0 var(--space-3);
+  border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; white-space: nowrap;
 }
 
-/* Pending restaurants */
-.pendingList { padding: 8px; }
-.pendingItem {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; border-radius: var(--radius-sm);
-  transition: background 0.1s;
-}
-.pendingItem:hover { background: var(--separator); }
-.pendingAvatar {
-  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-  background: var(--warning-bg); color: var(--warning);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 15px;
-}
-.pendingInfo { flex: 1; min-width: 0; }
-.pendingName { font-weight: 600; font-size: 14px; }
-.pendingOwner { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.emptyPending { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 13px; }
+/* Jadval skeleton */
+.tableSkeleton { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-2) 0; }
+.skelRow { display: flex; align-items: center; gap: var(--space-3); }
 
-@media (max-width: 1200px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 900px) {
-  .chartsRow, .bottomRow { grid-template-columns: 1fr; }
-  .tableCard { max-width: 100% !important; }
+/* ---- Blok holatlari (xato / bo'sh) ---- */
+.blockState, .blockStateCompact {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: var(--space-3); color: var(--color-text-muted);
 }
-@media (max-width: 600px) { .statsGrid { grid-template-columns: 1fr; } }
+.blockState { min-height: 220px; padding: var(--space-8) var(--space-4); }
+.blockStateCompact { min-height: 120px; padding: var(--space-5) var(--space-4); }
+.blockStateIcon { color: var(--color-error); }
+.blockStateText { font-size: 14px; color: var(--color-text-secondary); max-width: 340px; }
+
+/* ---- Responsiv ---- */
+@media (max-width: 1024px) {
+  .chartsRow { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .pageTitle { font-size: 26px; }
+  .statValue { font-size: 24px; }
+  .donutWrap { justify-content: center; }
+}

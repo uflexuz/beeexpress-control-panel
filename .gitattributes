@@ -1,0 +1,13 @@
+# Satr oxirlari: barcha matn fayllar LF bilan saqlanadi (Windows CRLF konversiyasi o'qchirilgan)
+* text=auto eol=lf
+
+# Binar fayllar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.jar binary
+*.keystore binary
+*.ttf binary
+*.otf binary

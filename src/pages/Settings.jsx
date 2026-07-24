@@ -1,140 +1,256 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Save, Settings as SettingsIcon, Percent, Truck,
-  DollarSign, Phone, Mail, MapPin, Bike,
+  User, Save, Info, Phone, Mail, Shield, Server, Hash, Globe, CheckCircle2,
 } from 'lucide-react';
-import { FAKE_PLATFORM_SETTINGS } from '../lib/fakeData';
-import { formatSum } from '../lib/helpers';
+import { api, API_BASE_URL } from '../lib/api';
+import { phoneFormat, formatDateTime } from '../lib/helpers';
+import { useAuth } from '../contexts/AuthContext';
 import s from './Settings.module.css';
 
+/* ---------------------------------------------------------------------------
+ * Sozlamalar:
+ *   1) Admin profili — GET /user/profile (yuklash) / PUT /user/profile (saqlash).
+ *      Tahrirlanadi: name, email. Faqat o'qish: telefon, rol, ID.
+ *   2) Tizim haqida — statik/muhit ma'lumotlari kartasi.
+ * ------------------------------------------------------------------------- */
+
+const APP_VERSION = '1.0.0';
+const ENV_LABELS = { development: 'Ishlab chiqish', production: 'Ishlab turgan' };
+
+const ROLE_LABELS = {
+  admin: 'Administrator',
+  owner: 'Restoran egasi',
+  seller: 'Sotuvchi',
+  courier: 'Kuryer',
+  client: 'Mijoz',
+};
+
 export default function Settings() {
-  const [form, setForm] = useState(FAKE_PLATFORM_SETTINGS);
+  const { user } = useAuth();
+
+  const [profile, setProfile] = useState(() => user || null);
+  const [form, setForm] = useState(() => ({
+    name: user?.name || '',
+    email: user?.email || '',
+  }));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
-  const set = (k, v) => { setForm((p) => ({ ...p, [k]: v })); setSaved(false); };
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const p = await api.auth.me();
+      if (p && (p.id || p.uuid)) {
+        setProfile(p);
+        setForm({ name: p.name || '', email: p.email || '' });
+      }
+    } catch (e) {
+      setError((e && e.message) || 'Profilni yuklab bo\'lmadi.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setSaving(false);
-    setSaved(true);
+  useEffect(() => { load(); }, [load]);
+
+  const set = (k, v) => {
+    setForm((prev) => ({ ...prev, [k]: v }));
+    setSaved(false);
+    setSaveError(null);
   };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaveError(null);
+    setSaved(false);
+
+    if (!form.name.trim()) {
+      setSaveError('Ism kiritilishi shart.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = { name: form.name.trim(), email: form.email.trim() };
+      const updated = await api.auth.updateProfile(payload);
+      if (updated && (updated.id || updated.uuid)) {
+        setProfile(updated);
+        setForm({ name: updated.name || '', email: updated.email || '' });
+      } else {
+        setProfile((prev) => ({ ...(prev || {}), ...payload }));
+      }
+      setSaved(true);
+    } catch (err) {
+      setSaveError((err && err.message) || 'Saqlashda xatolik yuz berdi.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // --- Yuklanish (kesh yo'q) ---
+  if (loading && !profile) {
+    return (
+      <div className={s.page}>
+        <h1 className="page-title">Sozlamalar</h1>
+        <div className="card">
+          <div className="skeleton skeleton-title" style={{ width: '30%', marginBottom: 20 }} />
+          <div className={s.formGrid}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <div className="skeleton skeleton-text" style={{ width: '40%', marginBottom: 10 }} />
+                <div className="skeleton skeleton-btn" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Xato (ma'lumot umuman yo'q) ---
+  if (error && !profile) {
+    return (
+      <div className={s.page}>
+        <h1 className="page-title">Sozlamalar</h1>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state__emoji">⚠️</div>
+            <div className="empty-state__title">Profilni yuklab bo'lmadi</div>
+            <div className="empty-state__text">{error}</div>
+            <button className="btn btn-primary" onClick={load}>Qayta urinish</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const p = profile || {};
+  const roleLabel = ROLE_LABELS[p.role] || p.role || '—';
+  const envMode = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE) || 'production';
+  const envLabel = ENV_LABELS[envMode] || envMode;
 
   return (
     <div className={s.page}>
-      <div className={s.pageHeader}>
-        <h1 className={s.pageTitle}>Platforma sozlamalari</h1>
-        <button className={`${s.saveBtn} ${saved ? s.saveBtnSaved : ''}`} onClick={handleSubmit} disabled={saving}>
-          <Save size={18} />
-          {saving ? 'Saqlanmoqda...' : saved ? 'Saqlandi ✓' : 'Saqlash'}
-        </button>
+      <div className={s.header}>
+        <h1 className="page-title">Sozlamalar</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className={s.sections}>
-        {/* Commission */}
-        <section className={s.section}>
-          <div className={s.sectionHeader}>
-            <Percent size={20} />
-            <div><h2>Komissiya sozlamalari</h2><p>Restoranlarga komissiya stavkalari</p></div>
-          </div>
-          <div className={s.sectionBody}>
-            <div className={s.grid}>
-              <div className={s.field}>
-                <label>Standart komissiya (%)</label>
-                <input type="number" value={form.commission_rate} onChange={(e) => set('commission_rate', Number(e.target.value))} />
-                <span className={s.hint}>Barcha yangi restoranlar uchun</span>
-              </div>
-              <div className={s.field}>
-                <label>Minimal komissiya (%)</label>
-                <input type="number" value={form.min_commission_rate} onChange={(e) => set('min_commission_rate', Number(e.target.value))} />
-              </div>
-              <div className={s.field}>
-                <label>Maksimal komissiya (%)</label>
-                <input type="number" value={form.max_commission_rate} onChange={(e) => set('max_commission_rate', Number(e.target.value))} />
-              </div>
+      <div className={s.grid}>
+        {/* Admin profili */}
+        <form className="card" onSubmit={handleSave}>
+          <div className={s.cardHead}>
+            <div className={s.cardIco}><User size={20} /></div>
+            <div>
+              <h2 className={s.cardTitle}>Admin profili</h2>
+              <p className="muted">Shaxsiy ma'lumotlaringiz</p>
             </div>
           </div>
-        </section>
 
-        {/* Delivery */}
-        <section className={s.section}>
-          <div className={s.sectionHeader}>
-            <Truck size={20} />
-            <div><h2>Yetkazib berish</h2><p>Bazaviy narxlar va limitlar</p></div>
-          </div>
-          <div className={s.sectionBody}>
-            <div className={s.grid}>
-              <div className={s.field}>
-                <label>Bazaviy yetkazish narxi (so'm)</label>
-                <div className={s.inputIcon}><DollarSign size={16} /><input type="number" value={form.base_delivery_fee} onChange={(e) => set('base_delivery_fee', Number(e.target.value))} /></div>
-                <span className={s.hint}>{formatSum(form.base_delivery_fee)}</span>
-              </div>
-              <div className={s.field}>
-                <label>Bepul yetkazish chegarasi (so'm)</label>
-                <div className={s.inputIcon}><DollarSign size={16} /><input type="number" value={form.free_delivery_threshold} onChange={(e) => set('free_delivery_threshold', Number(e.target.value))} /></div>
-                <span className={s.hint}>{formatSum(form.free_delivery_threshold)} dan oshganda bepul</span>
-              </div>
-              <div className={s.field}>
-                <label>Minimal buyurtma (so'm)</label>
-                <div className={s.inputIcon}><DollarSign size={16} /><input type="number" value={form.min_order_amount} onChange={(e) => set('min_order_amount', Number(e.target.value))} /></div>
-                <span className={s.hint}>{formatSum(form.min_order_amount)}</span>
-              </div>
-              <div className={s.field}>
-                <label>Maksimal radius (km)</label>
-                <div className={s.inputIcon}><MapPin size={16} /><input type="number" value={form.max_delivery_radius_km} onChange={(e) => set('max_delivery_radius_km', Number(e.target.value))} /></div>
-              </div>
+          {error && (
+            <div className={`${s.alert} ${s.alertErr}`}>
+              {error} — keshdagi ma'lumot ko'rsatilmoqda.
             </div>
-          </div>
-        </section>
+          )}
+          {saveError && <div className={`${s.alert} ${s.alertErr}`}>{saveError}</div>}
+          {saved && (
+            <div className={`${s.alert} ${s.alertOk}`}>
+              <CheckCircle2 size={16} /> Profil saqlandi.
+            </div>
+          )}
 
-        {/* Courier pay */}
-        <section className={s.section}>
-          <div className={s.sectionHeader}>
-            <Bike size={20} />
-            <div><h2>Kuryer to'lovlari</h2><p>Bazaviy to'lov va har km uchun to'lov</p></div>
-          </div>
-          <div className={s.sectionBody}>
-            <div className={s.grid}>
-              <div className={s.field}>
-                <label>Bazaviy to'lov (so'm)</label>
-                <div className={s.inputIcon}><DollarSign size={16} /><input type="number" value={form.courier_base_pay} onChange={(e) => set('courier_base_pay', Number(e.target.value))} /></div>
-                <span className={s.hint}>{formatSum(form.courier_base_pay)} har buyurtma uchun</span>
-              </div>
-              <div className={s.field}>
-                <label>Har km uchun (so'm)</label>
-                <div className={s.inputIcon}><DollarSign size={16} /><input type="number" value={form.courier_per_km_pay} onChange={(e) => set('courier_per_km_pay', Number(e.target.value))} /></div>
-                <span className={s.hint}>{formatSum(form.courier_per_km_pay)} / km</span>
-              </div>
-            </div>
-          </div>
-        </section>
+          <div className={s.formGrid}>
+            <label className="field">
+              <span className={`field__label ${s.lbl}`}><User size={14} /> Ism *</span>
+              <input
+                className="input"
+                placeholder="To'liq ism"
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+              />
+            </label>
 
-        {/* Support */}
-        <section className={s.section}>
-          <div className={s.sectionHeader}>
-            <Phone size={20} />
-            <div><h2>Qo'llab-quvvatlash</h2><p>Platforma aloqa ma'lumotlari</p></div>
-          </div>
-          <div className={s.sectionBody}>
-            <div className={s.grid}>
-              <div className={s.field}>
-                <label>Platforma nomi</label>
-                <input value={form.platform_name} onChange={(e) => set('platform_name', e.target.value)} />
-              </div>
-              <div className={s.field}>
-                <label>Telefon</label>
-                <div className={s.inputIcon}><Phone size={16} /><input value={form.support_phone} onChange={(e) => set('support_phone', e.target.value)} /></div>
-              </div>
-              <div className={s.field}>
-                <label>Email</label>
-                <div className={s.inputIcon}><Mail size={16} /><input value={form.support_email} onChange={(e) => set('support_email', e.target.value)} /></div>
+            <label className="field">
+              <span className={`field__label ${s.lbl}`}><Mail size={14} /> Email</span>
+              <input
+                className="input"
+                type="email"
+                placeholder="admin@example.com"
+                value={form.email}
+                onChange={(e) => set('email', e.target.value)}
+              />
+            </label>
+
+            <div className="field">
+              <span className={`field__label ${s.lbl}`}><Phone size={14} /> Telefon</span>
+              <div className={s.readonly}>{phoneFormat(p.phone)}</div>
+              <span className="field__hint">Telefon raqamini bu yerda o'zgartirib bo'lmaydi.</span>
+            </div>
+
+            <div className="field">
+              <span className={`field__label ${s.lbl}`}><Shield size={14} /> Rol</span>
+              <div className={s.readonly}>
+                <span className="badge badge-accent">{roleLabel}</span>
               </div>
             </div>
           </div>
-        </section>
-      </form>
+
+          <div className={s.formActions}>
+            <button className="btn btn-primary btn-lg" type="submit" disabled={saving || !form.name.trim()}>
+              <Save size={18} />
+              {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+            </button>
+          </div>
+        </form>
+
+        {/* Tizim haqida */}
+        <div className="card">
+          <div className={s.cardHead}>
+            <div className={s.cardIco}><Info size={20} /></div>
+            <div>
+              <h2 className={s.cardTitle}>Tizim haqida</h2>
+              <p className="muted">Platforma va sessiya ma'lumotlari</p>
+            </div>
+          </div>
+
+          <dl className={s.infoList}>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><Globe size={15} /> Platforma</dt>
+              <dd className={s.infoValue}>Bee Express — Boshqaruv paneli</dd>
+            </div>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><Hash size={15} /> Versiya</dt>
+              <dd className={s.infoValue}>{APP_VERSION}</dd>
+            </div>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><Server size={15} /> Muhit</dt>
+              <dd className={s.infoValue}>{envLabel}</dd>
+            </div>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><Server size={15} /> API manzili</dt>
+              <dd className={`${s.infoValue} ${s.infoMono}`}>{API_BASE_URL}</dd>
+            </div>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><User size={15} /> Joriy admin</dt>
+              <dd className={s.infoValue}>{p.name || '—'}</dd>
+            </div>
+            <div className={s.infoRow}>
+              <dt className={s.infoLabel}><Hash size={15} /> Foydalanuvchi ID</dt>
+              <dd className={`${s.infoValue} ${s.infoMono}`}>{p.id != null ? p.id : (p.uuid || '—')}</dd>
+            </div>
+            {p.created_at && (
+              <div className={s.infoRow}>
+                <dt className={s.infoLabel}><Info size={15} /> Ro'yxatdan o'tgan</dt>
+                <dd className={s.infoValue}>{formatDateTime(p.created_at)}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,63 +1,58 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Store, ShoppingBag, Users, Bike,
-  Wallet, Settings, LogOut, ChevronLeft, Bell, Shield,
+  LayoutDashboard, ShoppingBag, Store, Users, Bike,
+  Wallet, Settings, LogOut, Menu, X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import s from './Layout.module.css';
 
 const NAV = [
-  { to: '/',            icon: LayoutDashboard, label: 'Dashboard',    end: true },
-  { to: '/restaurants', icon: Store,           label: 'Restoranlar'          },
-  { to: '/orders',      icon: ShoppingBag,     label: 'Buyurtmalar'          },
-  { to: '/users',       icon: Users,           label: 'Foydalanuvchilar'     },
-  { to: '/couriers',    icon: Bike,            label: 'Kuryerlar'            },
-  { to: '/finance',     icon: Wallet,          label: 'Moliya'               },
-  { to: '/settings',    icon: Settings,        label: 'Sozlamalar'           },
+  { to: '/',            icon: LayoutDashboard, label: 'Boshqaruv',        end: true },
+  { to: '/orders',      icon: ShoppingBag,     label: 'Buyurtmalar'                 },
+  { to: '/restaurants', icon: Store,           label: 'Restoranlar'                 },
+  { to: '/users',       icon: Users,           label: 'Foydalanuvchilar'            },
+  { to: '/couriers',    icon: Bike,            label: 'Kuryerlar'                   },
+  { to: '/finance',     icon: Wallet,          label: 'Moliya'                      },
+  { to: '/settings',    icon: Settings,        label: 'Sozlamalar'                  },
 ];
+
+/** Joriy yo'l bo'yicha sahifa nomini topadi. */
+function pageTitle(pathname) {
+  const match = NAV.find((n) =>
+    n.end ? pathname === n.to : pathname === n.to || pathname.startsWith(`${n.to}/`),
+  );
+  return match ? match.label : 'Boshqaruv';
+}
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobile, setMobile] = useState(window.innerWidth < 768);
+  const [open, setOpen] = useState(false); // mobil sidebar
 
+  // Sahifa almashsa mobil sidebar yopiladi.
   useEffect(() => {
-    const onResize = () => {
-      const m = window.innerWidth < 768;
-      setMobile(m);
-      if (m) setCollapsed(true);
-    };
-    window.addEventListener('resize', onResize);
-    onResize();
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+    setOpen(false);
+  }, [location]);
 
-  useEffect(() => {
-    if (mobile) setCollapsed(true);
-  }, [location, mobile]);
+  const title = pageTitle(location.pathname);
+  const adminName = user?.name || 'Administrator';
 
   return (
     <div className={s.layout}>
+      {/* Mobil overlay */}
+      {open && <div className={s.overlay} onClick={() => setOpen(false)} />}
+
       {/* Sidebar */}
-      <aside className={`${s.sidebar} ${collapsed ? s.sidebarCollapsed : ''}`}>
-        {/* Brand */}
+      <aside className={`${s.sidebar} ${open ? s.sidebarOpen : ''}`}>
         <div className={s.brand}>
-          <div className={s.brandIcon}><Shield size={22} /></div>
-          {!collapsed && <span className={s.brandText}>Bee Express<small>Control Panel</small></span>}
+          <span className={s.brandMark}>🐝</span>
+          <span className={s.brandText}>
+            Bee Express
+            <small>Admin panel</small>
+          </span>
         </div>
 
-        {/* Collapse toggle */}
-        <button
-          className={`${s.collapseBtn} ${collapsed ? s.collapseBtnRotated : ''}`}
-          onClick={() => setCollapsed((c) => !c)}
-          title={collapsed ? 'Yoyish' : "Yig'ish"}
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        {/* Nav */}
         <nav className={s.nav}>
           {NAV.map(({ to, icon: Icon, label, end }) => (
             <NavLink
@@ -65,50 +60,47 @@ export default function Layout() {
               to={to}
               end={end}
               className={({ isActive }) => `${s.navItem} ${isActive ? s.navItemActive : ''}`}
-              title={collapsed ? label : undefined}
             >
               <Icon size={20} />
-              {!collapsed && <span>{label}</span>}
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
-
-        {/* User card */}
-        <div className={s.sidebarBottom}>
-          <div className={s.userCard}>
-            <div className={s.avatar}>{user?.name?.charAt(0) || 'A'}</div>
-            {!collapsed && (
-              <div className={s.userInfo}>
-                <div className={s.userName}>{user?.name}</div>
-                <div className={s.userRole}>Super Admin</div>
-              </div>
-            )}
-          </div>
-          <button className={s.logoutBtn} onClick={logout} title="Chiqish">
-            <LogOut size={18} />
-            {!collapsed && <span>Chiqish</span>}
-          </button>
-        </div>
-
       </aside>
 
       {/* Main */}
       <div className={s.main}>
         <header className={s.header}>
           <div className={s.headerLeft}>
-            {NAV.find((n) => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/')?.label
-              || NAV.find((n) => n.end && location.pathname === n.to)?.label
-              || 'Dashboard'}
+            <button
+              className={s.menuBtn}
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Menyu"
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <h1 className={s.pageTitle}>{title}</h1>
           </div>
+
           <div className={s.headerRight}>
-            <button className={s.notifBtn}>
-              <Bell size={20} />
-              <span className={s.notifDot} />
+            <div className={s.adminBox}>
+              <div className={s.adminAvatar}>{adminName.charAt(0).toUpperCase()}</div>
+              <div className={s.adminMeta}>
+                <span className={s.adminName}>{adminName}</span>
+                <span className={s.adminRole}>Administrator</span>
+              </div>
+            </div>
+            <button className={s.logoutBtn} onClick={logout} title="Chiqish">
+              <LogOut size={18} />
+              <span className={s.logoutLabel}>Chiqish</span>
             </button>
           </div>
         </header>
+
         <main className={s.content}>
-          <Outlet />
+          <div className={s.contentInner}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
