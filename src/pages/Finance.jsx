@@ -31,6 +31,18 @@ const PAY_PILL = {
   failed: '--cancelled', cancelled: '--cancelled', canceled: '--cancelled', declined: '--cancelled',
 };
 
+// To'lov maqsadi (meta.purpose) -> o'zbekcha nom. wallet_topup'da order_id 0 bo'ladi.
+const PURPOSE_LABELS = {
+  wallet_topup: 'Hamyon to\'ldirish',
+  order: 'Buyurtma to\'lovi',
+  order_payment: 'Buyurtma to\'lovi',
+};
+function purposeLabel(purpose) {
+  if (!purpose) return null;
+  const key = String(purpose).toLowerCase();
+  return PURPOSE_LABELS[key] || String(purpose);
+}
+
 function cap(v) {
   if (!v) return '—';
   const str = String(v);
@@ -120,14 +132,14 @@ function PaymentsTab() {
         <table className="table">
           <thead>
             <tr>
-              <th>Buyurtma</th><th>Provayder</th>
-              <th className="td-right">Summa</th><th>Holat</th>
+              <th>Buyurtma / Maqsad</th><th>Provayder</th>
+              <th className="td-right">Summa</th><th>Holat</th><th>Sana</th>
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: 6 }).map((_, i) => (
               <tr key={i}>
-                {Array.from({ length: 4 }).map((__, j) => (
+                {Array.from({ length: 5 }).map((__, j) => (
                   <td key={j}><div className="skeleton skeleton-text" style={{ width: j === 0 ? '60%' : '80%' }} /></td>
                 ))}
               </tr>
@@ -159,22 +171,26 @@ function PaymentsTab() {
         <table className="table">
           <thead>
             <tr>
-              <th>Buyurtma</th>
+              <th>Buyurtma / Maqsad</th>
               <th>Provayder</th>
               <th className="td-right">Summa</th>
               <th>Holat</th>
+              <th>Sana</th>
             </tr>
           </thead>
           <tbody>
             {data.map((p, i) => {
               const st = statusLabel(p.status);
               const variant = PAY_PILL[String(p.status || '').toLowerCase()] || '--neutral';
-              const orderId = p.order_id ?? p.order?.id;
+              // order_id 0 (wallet_topup) — buyurtma yo'q; maqsad (meta.purpose) ko'rsatiladi.
+              const rawOrderId = p.order_id ?? p.order?.id;
+              const hasOrder = rawOrderId != null && Number(rawOrderId) > 0;
+              const purpose = purposeLabel(p.meta?.purpose);
               return (
                 <tr key={p.id ?? p.provider_payment_id ?? i}>
                   <td>
                     <span className={s.orderRef}>
-                      {orderId != null ? `#${orderId}` : '—'}
+                      {hasOrder ? `#${rawOrderId}` : (purpose || '—')}
                     </span>
                     {p.provider_payment_id && (
                       <div className={s.subRef}>{p.provider_payment_id}</div>
@@ -185,6 +201,7 @@ function PaymentsTab() {
                   <td>
                     <span className={`status-pill status-pill${variant}`}>{st.label}</span>
                   </td>
+                  <td className="td-muted">{formatDateTime(p.created_at)}</td>
                 </tr>
               );
             })}
@@ -198,6 +215,17 @@ function PaymentsTab() {
 // ---------------------------------------------------------------------------
 // 2) Audit — shakl noma'lum, defensiv o'qiladi
 // ---------------------------------------------------------------------------
+// Real API action namunalari (meta bilan): vendor.commission_changed {before,after},
+// vendor_balance.topup {amount,balance_before,balance_after},
+// order.status_changed {from,to,note}, order.created {order_id}.
+const ACTION_LABELS = {
+  'vendor.commission_changed': 'Komissiya o\'zgartirildi',
+  'vendor_balance.topup': 'Balans to\'ldirildi',
+  'order.status_changed': 'Buyurtma holati o\'zgardi',
+  'order.created': 'Buyurtma yaratildi',
+  'wallet.refund': 'Mablag\' qaytarildi',
+};
+
 function auditActor(a) {
   return (
     a.user?.name || a.causer?.name || a.actor?.name || a.admin?.name ||
@@ -206,11 +234,16 @@ function auditActor(a) {
   );
 }
 function auditAction(a) {
-  return a.event || a.action || a.type || a.log_name || a.activity || 'Amal';
+  return a.action || a.event || a.type || a.log_name || a.activity || 'Amal';
+}
+function actionLabel(raw) {
+  if (!raw) return 'Amal';
+  const key = String(raw).toLowerCase();
+  return ACTION_LABELS[key] || cap(raw);
 }
 function auditTarget(a) {
-  const t = a.auditable_type || a.subject_type || a.model_type || a.entity_type || a.model;
-  const id = a.auditable_id ?? a.subject_id ?? a.model_id ?? a.entity_id;
+  const t = a.object_type || a.auditable_type || a.subject_type || a.model_type || a.entity_type || a.model;
+  const id = a.object_id ?? a.auditable_id ?? a.subject_id ?? a.model_id ?? a.entity_id;
   const short = t ? String(t).split('\\').pop() : null;
   if (short && id != null) return `${short} #${id}`;
   if (short) return short;
@@ -220,8 +253,37 @@ function auditTarget(a) {
 function auditWhen(a) {
   return a.created_at || a.createdAt || a.timestamp || a.date || a.logged_at || a.time;
 }
+/** meta obyektini (yoki JSON-satrni) defensiv o'qiydi. */
+function parseMeta(a) {
+  let m = a.meta;
+  if (typeof m === 'string') {
+    try { m = JSON.parse(m); } catch { return null; }
+  }
+  return m && typeof m === 'object' ? m : null;
+}
+/** meta'dan o'qiladigan qisqa xulosa: before→after, summa, from→to, izoh. */
+function auditMetaSummary(a) {
+  const m = parseMeta(a);
+  if (!m) return '';
+  const action = String(a.action || '').toLowerCase();
+  const parts = [];
+  if (m.before !== undefined && m.after !== undefined) {
+    const pct = action.includes('commission');
+    parts.push(`${m.before}${pct ? '%' : ''} → ${m.after}${pct ? '%' : ''}`);
+  }
+  if (m.from !== undefined && m.to !== undefined) {
+    parts.push(`${statusLabel(m.from).label} → ${statusLabel(m.to).label}`);
+  }
+  if (m.amount !== undefined) parts.push(`Summa: ${formatSum(m.amount)}`);
+  if (m.balance_before !== undefined && m.balance_after !== undefined) {
+    parts.push(`Balans: ${formatSum(m.balance_before)} → ${formatSum(m.balance_after)}`);
+  }
+  if (m.order_id !== undefined && parts.length === 0) parts.push(`Buyurtma #${m.order_id}`);
+  if (m.note) parts.push(String(m.note));
+  return parts.join('  ·  ');
+}
 function auditDesc(a) {
-  return a.description || a.message || a.note || a.details || '';
+  return a.description || a.message || a.note || a.details || auditMetaSummary(a) || '';
 }
 
 function AuditsTab() {
@@ -271,7 +333,7 @@ function AuditsTab() {
               <div className={s.auditIco}><ScrollText size={17} /></div>
               <div className={s.auditBody}>
                 <div className={s.auditTop}>
-                  <span className={s.auditAction}>{cap(auditAction(a))}</span>
+                  <span className={s.auditAction}>{actionLabel(auditAction(a))}</span>
                   {target && <span className={s.auditTarget}>{target}</span>}
                 </div>
                 {desc && <div className={s.auditDesc}>{desc}</div>}

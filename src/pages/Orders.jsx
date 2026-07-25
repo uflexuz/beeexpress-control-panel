@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import {
-  formatSum, getStatus, timeAgo, formatDateTime, PAYMENT_STATUS,
+  formatSum, getStatus, PAYMENT_STATUS,
 } from '../lib/helpers';
 import s from './Orders.module.css';
 
@@ -312,14 +312,13 @@ export default function Orders() {
                 <th>Summa</th>
                 <th>To'lov</th>
                 <th>Holat</th>
-                <th>Sana</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className={s.emptyRow}>
+                  <td colSpan={7} className={s.emptyRow}>
                     <ShoppingBag size={32} />
                     <p>Filtrga mos buyurtma topilmadi</p>
                   </td>
@@ -350,9 +349,6 @@ export default function Orders() {
                     </td>
                     <td>
                       <span className={s.badge} style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                    </td>
-                    <td className={s.muted} title={formatDateTime(o.created_at)}>
-                      {timeAgo(o.created_at) || '—'}
                     </td>
                     <td>
                       <button
@@ -404,8 +400,17 @@ export default function Orders() {
                         <span className={s.infoLabel}>To'lov holati</span>
                         <span>{ps.meta ? ps.meta.label : (selected.payment_status || '—')}</span>
                       </div>
-                      <div className={s.infoItem}><span className={s.infoLabel}>Yaratilgan</span><span>{formatDateTime(selected.created_at)}</span></div>
                     </div>
+
+                    {/* Manzil / Izoh — note ba'zan "Manzil / GPS / Telefon" matnini o'z ichiga oladi */}
+                    {selected.note && String(selected.note).trim() && (
+                      <div className={s.section}>
+                        <div className={s.sectionTitle}>Manzil / Izoh</div>
+                        <div className={s.muted} style={{ whiteSpace: 'pre-line' }}>
+                          {String(selected.note).trim()}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Mahsulotlar */}
                     <div className={s.section}>

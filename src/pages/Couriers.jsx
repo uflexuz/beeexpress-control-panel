@@ -1,14 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, RotateCw } from 'lucide-react';
+import { Search, RotateCw, Info } from 'lucide-react';
 import api, { ApiError } from '../lib/api';
-import { phoneFormat, VEHICLE_MAP } from '../lib/helpers';
+import { phoneFormat } from '../lib/helpers';
 import s from './Couriers.module.css';
 
-const STATUS_TABS = [
-  { key: 'all',     label: 'Hammasi' },
-  { key: 'online',  label: 'Online' },
-  { key: 'offline', label: 'Offline' },
-];
+/**
+ * Kuryerlar ro'yxati.
+ *
+ * Manba: GET /admin/users?role=courier → {id,uuid,name,phone,email,role,vendor_id}.
+ * ⚠️ Real API kuryer uchun is_online / rating / vehicle_type / balance
+ * MAYDONLARINI QAYTARMAYDI. Shu sababli "Holat / Reyting / Transport" ustunlari
+ * va online/offline filtr olib tashlangan — mavjud bo'lmagan ma'lumot o'rniga
+ * "—" ko'rsatib turmaslik uchun. Backend bu maydonlarni qaytara boshlaganda
+ * ustunlar qayta qo'shiladi (qarang: backendGaps).
+ */
 
 /** Javobni ({data,meta} yoki oddiy massiv) defensiv o'qish. */
 function extractList(res) {
@@ -18,15 +23,6 @@ function extractList(res) {
   return [];
 }
 
-/* Kuryer maydonlari user obyektida to'g'ridan-to'g'ri yoki `courier`
-   ichida kelishi mumkin — defensiv o'qiymiz. */
-const onlineOf = (c) => {
-  const v = c.is_online ?? c.courier?.is_online ?? c.online;
-  return typeof v === 'boolean' ? v : null;
-};
-const ratingOf = (c) => c.rating ?? c.courier?.rating ?? null;
-const vehicleOf = (c) => c.vehicle_type ?? c.courier?.vehicle_type ?? c.vehicle ?? null;
-
 const initial = (name) => (name ? String(name).trim().charAt(0).toUpperCase() : '?');
 
 export default function Couriers() {
@@ -34,11 +30,11 @@ export default function Couriers() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
 
-  const load = useCallback(async (silent = false) => {
-    if (!silent) { setLoading(true); setError(null); }
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await api.admin.users({ role: 'courier', limit: 100 });
       // Server rol paramini e'tiborsiz qoldirsa — mijoz tomonida ham filtrlaymiz.
@@ -49,44 +45,24 @@ export default function Couriers() {
       });
       setCouriers(list);
       setTotal(res?.meta?.total ?? list.length);
-      if (silent) setError(null);
     } catch (e) {
-      if (!silent) setError(e instanceof ApiError ? e.message : 'Kuryerlarni yuklab bo\'lmadi.');
+      setError(e instanceof ApiError ? e.message : 'Kuryerlarni yuklab bo\'lmadi.');
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   }, []);
 
-  // Boshlang'ich yuklash + is_online ni jonli ushlab turish uchun polling (15s).
-  useEffect(() => {
-    load();
-    const id = setInterval(() => load(true), 15000);
-    return () => clearInterval(id);
-  }, [load]);
-
-  const counts = useMemo(() => {
-    let online = 0, offline = 0;
-    for (const c of couriers) {
-      const v = onlineOf(c);
-      if (v === true) online += 1;
-      else if (v === false) offline += 1;
-    }
-    return { all: couriers.length, online, offline };
-  }, [couriers]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(() => {
-    let list = couriers;
-    if (statusFilter === 'online') list = list.filter((c) => onlineOf(c) === true);
-    else if (statusFilter === 'offline') list = list.filter((c) => onlineOf(c) === false);
     const q = search.trim().toLowerCase();
-    if (q) {
-      list = list.filter((c) =>
-        String(c.name || '').toLowerCase().includes(q) ||
-        String(c.phone || '').includes(q),
-      );
-    }
-    return list;
-  }, [couriers, statusFilter, search]);
+    if (!q) return couriers;
+    return couriers.filter((c) =>
+      String(c.name || '').toLowerCase().includes(q) ||
+      String(c.phone || '').includes(q) ||
+      String(c.email || '').toLowerCase().includes(q),
+    );
+  }, [couriers, search]);
 
   return (
     <div className={s.page}>
@@ -94,29 +70,16 @@ export default function Couriers() {
         <h1 className="page-title">Kuryerlar</h1>
         {!loading && !error && (
           <div className={s.headerStats}>
-            <span className="badge badge-success">Online: {counts.online}</span>
-            <span className="badge">Offline: {counts.offline}</span>
+            <span className="badge">Jami: {total.toLocaleString('uz-UZ')}</span>
           </div>
         )}
       </div>
 
       <div className={s.toolbar}>
-        <div className={s.chips}>
-          {STATUS_TABS.map((t) => (
-            <button
-              key={t.key}
-              className={`chip ${statusFilter === t.key ? 'is-active' : ''}`}
-              onClick={() => setStatusFilter(t.key)}
-            >
-              {t.label}
-              {!loading && <span className="chip__count">{counts[t.key] ?? 0}</span>}
-            </button>
-          ))}
-        </div>
         <label className={`search ${s.searchField}`}>
           <Search size={18} />
           <input
-            placeholder="Ism yoki telefon..."
+            placeholder="Ism, telefon yoki email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -131,7 +94,7 @@ export default function Couriers() {
             <div className="empty-state__emoji">⚠️</div>
             <div className="empty-state__title">Xatolik yuz berdi</div>
             <div className="empty-state__text">{error}</div>
-            <button className="btn btn-primary" onClick={() => load()}>
+            <button className="btn btn-primary" onClick={load}>
               <RotateCw size={16} /> Qayta urinish
             </button>
           </div>
@@ -142,31 +105,25 @@ export default function Couriers() {
             <div className="empty-state__emoji">🛵</div>
             <div className="empty-state__title">Kuryerlar topilmadi</div>
             <div className="empty-state__text">
-              {search || statusFilter !== 'all'
-                ? 'Filtr yoki qidiruvga mos kuryer yo\'q. Shartlarni o\'zgartiring.'
+              {search
+                ? 'Qidiruvga mos kuryer yo\'q. Shartlarni o\'zgartiring.'
                 : 'Hozircha kuryerlar yo\'q.'}
             </div>
           </div>
         </div>
       ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Kuryer</th>
-                <th>Telefon</th>
-                <th>Holat</th>
-                <th>Reyting</th>
-                <th>Transport</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((c) => {
-                const online = onlineOf(c);
-                const rating = ratingOf(c);
-                const vehicle = vehicleOf(c);
-                return (
+        <>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Kuryer</th>
+                  <th>Telefon</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((c) => (
                   <tr key={c.id ?? c.uuid}>
                     <td className="td-muted td-mono">#{c.id ?? '—'}</td>
                     <td>
@@ -179,31 +136,16 @@ export default function Couriers() {
                       </div>
                     </td>
                     <td className="td-mono">{phoneFormat(c.phone)}</td>
-                    <td>
-                      {online === true ? (
-                        <span className="status-pill status-pill--delivered">Online</span>
-                      ) : online === false ? (
-                        <span className="status-pill status-pill--neutral">Offline</span>
-                      ) : (
-                        <span className="td-muted">—</span>
-                      )}
-                    </td>
-                    <td>
-                      {rating != null && !isNaN(rating) ? (
-                        <span className={s.rating}>⭐ {Number(rating).toFixed(1)}</span>
-                      ) : (
-                        <span className="td-muted">—</span>
-                      )}
-                    </td>
-                    <td>
-                      {vehicle ? (VEHICLE_MAP[vehicle] || vehicle) : <span className="td-muted">—</span>}
-                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="muted" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, fontSize: 13 }}>
+            <Info size={14} />
+            Online holat, reyting va transport ma'lumotlarini server hozircha qaytarmaydi.
+          </p>
+        </>
       )}
     </div>
   );
@@ -215,7 +157,7 @@ function SkeletonTable() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th><th>Kuryer</th><th>Telefon</th><th>Holat</th><th>Reyting</th><th>Transport</th>
+            <th>ID</th><th>Kuryer</th><th>Telefon</th>
           </tr>
         </thead>
         <tbody>
@@ -232,9 +174,6 @@ function SkeletonTable() {
                 </div>
               </td>
               <td><div className="skeleton skeleton-text" style={{ width: 120 }} /></td>
-              <td><div className="skeleton skeleton-text" style={{ width: 68 }} /></td>
-              <td><div className="skeleton skeleton-text" style={{ width: 48 }} /></td>
-              <td><div className="skeleton skeleton-text" style={{ width: 96 }} /></td>
             </tr>
           ))}
         </tbody>

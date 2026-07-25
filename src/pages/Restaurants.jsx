@@ -446,7 +446,8 @@ export default function Restaurants() {
                 <th>Restoran</th>
                 <th>Telefon</th>
                 <th>Manzil</th>
-                <th>Komissiya</th>
+                <th className="td-right">Min. buyurtma</th>
+                <th className="td-right">Yetkazish</th>
                 <th>Faollik</th>
                 <th className="td-right">Amallar</th>
               </tr>
@@ -500,7 +501,8 @@ export default function Restaurants() {
                         <span>{r.address || '—'}</span>
                       </div>
                     </td>
-                    <td className="td-mono">{comm != null ? `${comm}%` : '—'}</td>
+                    <td className="td-mono td-right">{formatSum(r.min_order_amount)}</td>
+                    <td className="td-mono td-right">{formatSum(r.delivery_fee)}</td>
                     <td>
                       <span className="badge" style={{ background: st.bg, color: st.color }}>
                         {st.label}
@@ -571,7 +573,8 @@ function SkeletonTable() {
             <th>Restoran</th>
             <th>Telefon</th>
             <th>Manzil</th>
-            <th>Komissiya</th>
+            <th className="td-right">Min. buyurtma</th>
+            <th className="td-right">Yetkazish</th>
             <th>Faollik</th>
             <th className="td-right">Amallar</th>
           </tr>
@@ -590,7 +593,8 @@ function SkeletonTable() {
               </td>
               <td><div className="skeleton skeleton-text" style={{ width: 120 }} /></td>
               <td><div className="skeleton skeleton-text" style={{ width: 160 }} /></td>
-              <td><div className="skeleton skeleton-text" style={{ width: 48 }} /></td>
+              <td><div className="skeleton skeleton-text" style={{ width: 72, marginLeft: 'auto' }} /></td>
+              <td><div className="skeleton skeleton-text" style={{ width: 72, marginLeft: 'auto' }} /></td>
               <td><div className="skeleton skeleton-text" style={{ width: 64, height: 22 }} /></td>
               <td className="td-right"><div className="skeleton skeleton-text" style={{ width: 32, height: 32, marginLeft: 'auto' }} /></td>
             </tr>

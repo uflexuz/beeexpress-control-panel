@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, RotateCw } from 'lucide-react';
 import api, { ApiError } from '../lib/api';
-import { formatDate, phoneFormat } from '../lib/helpers';
+import { phoneFormat } from '../lib/helpers';
 import s from './Users.module.css';
 
 /** Rol -> o'zbekcha nom + badge klassi (index.css utility). */
@@ -147,7 +147,6 @@ export default function Users() {
                 <th>Foydalanuvchi</th>
                 <th>Telefon</th>
                 <th>Rol</th>
-                <th>Ro'yxatdan</th>
               </tr>
             </thead>
             <tbody>
@@ -167,7 +166,6 @@ export default function Users() {
                     </td>
                     <td className="td-mono">{phoneFormat(u.phone)}</td>
                     <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
-                    <td className="td-muted">{formatDate(u.created_at)}</td>
                   </tr>
                 );
               })}
@@ -185,7 +183,7 @@ function SkeletonTable() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th><th>Foydalanuvchi</th><th>Telefon</th><th>Rol</th><th>Ro'yxatdan</th>
+            <th>ID</th><th>Foydalanuvchi</th><th>Telefon</th><th>Rol</th>
           </tr>
         </thead>
         <tbody>
@@ -203,7 +201,6 @@ function SkeletonTable() {
               </td>
               <td><div className="skeleton skeleton-text" style={{ width: 120 }} /></td>
               <td><div className="skeleton skeleton-text" style={{ width: 72 }} /></td>
-              <td><div className="skeleton skeleton-text" style={{ width: 88 }} /></td>
             </tr>
           ))}
         </tbody>
