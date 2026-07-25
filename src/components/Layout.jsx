@@ -5,6 +5,7 @@ import {
   Wallet, Settings, LogOut, Menu, X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import BrandMark from './BrandMark';
 import s from './Layout.module.css';
 
 const NAV = [
@@ -46,7 +47,7 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`${s.sidebar} ${open ? s.sidebarOpen : ''}`}>
         <div className={s.brand}>
-          <span className={s.brandMark}>🐝</span>
+          <BrandMark size={40} className={s.brandMark} />
           <span className={s.brandText}>
             Bee Express
             <small>Admin panel</small>

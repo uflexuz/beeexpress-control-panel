@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   User, Save, Info, Phone, Mail, Shield, Server, Hash, Globe, CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { api, API_BASE_URL } from '../lib/api';
 import { phoneFormat, formatDateTime } from '../lib/helpers';
@@ -119,7 +120,7 @@ export default function Settings() {
         <h1 className="page-title">Sozlamalar</h1>
         <div className="card">
           <div className="empty-state">
-            <div className="empty-state__emoji">⚠️</div>
+            <div className="empty-state__emoji"><AlertTriangle size={48} color="var(--color-error)" /></div>
             <div className="empty-state__title">Profilni yuklab bo'lmadi</div>
             <div className="empty-state__text">{error}</div>
             <button className="btn btn-primary" onClick={load}>Qayta urinish</button>

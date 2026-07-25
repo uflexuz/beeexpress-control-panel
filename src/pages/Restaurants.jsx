@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Search, Store, MapPin, MoreVertical, Ban, CheckCircle,
   Wallet, Percent, X, RefreshCw, AlertCircle,
+  AlertTriangle, Star,
 } from 'lucide-react';
 import api from '../lib/api';
 import { formatSum, phoneFormat, RESTAURANT_STATUS } from '../lib/helpers';
@@ -416,7 +417,7 @@ export default function Restaurants() {
       ) : error ? (
         <div className={s.stateCard}>
           <div className="empty-state">
-            <div className="empty-state__emoji">⚠️</div>
+            <div className="empty-state__emoji"><AlertTriangle size={48} color="var(--color-error)" /></div>
             <div className="empty-state__title">Xatolik yuz berdi</div>
             <div className="empty-state__text">{error}</div>
             <button className="btn btn-primary" onClick={load}>
@@ -427,7 +428,7 @@ export default function Restaurants() {
       ) : filtered.length === 0 ? (
         <div className={s.stateCard}>
           <div className="empty-state">
-            <div className="empty-state__emoji">🏪</div>
+            <div className="empty-state__emoji"><Store size={48} /></div>
             <div className="empty-state__title">
               {restaurants.length === 0 ? 'Restoranlar yo\'q' : 'Hech narsa topilmadi'}
             </div>
@@ -489,7 +490,12 @@ export default function Restaurants() {
                         <div>
                           <div className="cell__title">{r.name || '—'}</div>
                           <div className="cell__sub">
-                            {r.rating ? `⭐ ${Number(r.rating).toFixed(1)}` : 'Reyting yo\'q'}
+                            {r.rating ? (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                <Star size={13} fill="var(--color-accent)" color="var(--color-accent)" />
+                                {Number(r.rating).toFixed(1)}
+                              </span>
+                            ) : 'Reyting yo\'q'}
                           </div>
                         </div>
                       </div>

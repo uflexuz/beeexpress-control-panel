@@ -466,6 +466,9 @@ h1, h2, h3, h4, h5, h6 { font-weight: 800; letter-spacing: -0.02em; line-height:
   color: var(--color-text-muted);
 }
 .search:focus-within { box-shadow: var(--shadow-focus); background: var(--color-bg); }
+/* Fokus ringni tashqi .search wrapper beradi — ichki input ikkilanmasin */
+.search input:focus,
+.search input:focus-visible { box-shadow: none; outline: none; }
 .search input {
   flex: 1;
   border: none;
@@ -661,7 +664,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 800; letter-spacing: -0.02em; line-height:
   text-align: center;
   padding: var(--space-12) var(--space-6);
 }
-.empty-state__emoji { font-size: 48px; line-height: 1; }
+.empty-state__emoji { font-size: 48px; line-height: 0; color: var(--color-text-muted); }
 .empty-state__title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
 .empty-state__text { font-size: 14px; color: var(--color-text-muted); max-width: 320px; }
 .empty-state .btn { margin-top: var(--space-2); }

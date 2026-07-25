@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, RotateCw } from 'lucide-react';
+import { Search, RotateCw, AlertTriangle, Users as UsersIcon } from 'lucide-react';
 import api, { ApiError } from '../lib/api';
 import { phoneFormat } from '../lib/helpers';
 import s from './Users.module.css';
@@ -118,7 +118,7 @@ export default function Users() {
       ) : error ? (
         <div className={s.stateCard}>
           <div className="empty-state">
-            <div className="empty-state__emoji">⚠️</div>
+            <div className="empty-state__emoji"><AlertTriangle size={48} color="var(--color-error)" /></div>
             <div className="empty-state__title">Xatolik yuz berdi</div>
             <div className="empty-state__text">{error}</div>
             <button className="btn btn-primary" onClick={load}>
@@ -129,7 +129,7 @@ export default function Users() {
       ) : filtered.length === 0 ? (
         <div className={s.stateCard}>
           <div className="empty-state">
-            <div className="empty-state__emoji">👥</div>
+            <div className="empty-state__emoji"><UsersIcon size={48} /></div>
             <div className="empty-state__title">Foydalanuvchilar topilmadi</div>
             <div className="empty-state__text">
               {search || role !== 'all'

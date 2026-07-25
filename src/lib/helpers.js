@@ -146,11 +146,11 @@ export const COURIER_STATUS = {
   offline: { label: 'Offline', color: '#9E9B98', bg: '#F5F4F2' },
 };
 
-/** Transport turi (emoji + nom). */
+/** Transport turi (nom). Ikona kerak bo'lsa chaqiruvchi lucide-react ishlatadi. */
 export const VEHICLE_MAP = {
-  motorcycle: '🏍️ Mototsikl',
-  bicycle:    '🚲 Velosiped',
-  car:        '🚗 Avtomobil',
+  motorcycle: 'Mototsikl',
+  bicycle:    'Velosiped',
+  car:        'Avtomobil',
 };
 
 /** To'lov holatlari (payment_status / payment ro'yxati). */

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Search, ShoppingBag, Eye, X, RefreshCw, AlertCircle, Check,
+  Package, CreditCard, Banknote, Wallet,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import {
@@ -30,14 +31,22 @@ const STATUS_OPTIONS = [
   'delivered', 'cancelled', 'failed',
 ];
 
-/* To'lov usuli — emoji + o'zbekcha nom (defensiv). */
+/* To'lov usuli — o'zbekcha nom + lucide ikona (defensiv). */
 const PAY_METHOD = {
-  cash:   '💵 Naqd',
-  card:   '💳 Karta',
-  click:  '💳 Click',
-  payme:  '💳 Payme',
-  uzum:   '💳 Uzum',
-  wallet: '👛 Hamyon',
+  cash:   'Naqd',
+  card:   'Karta',
+  click:  'Click',
+  payme:  'Payme',
+  uzum:   'Uzum',
+  wallet: 'Hamyon',
+};
+const PAY_ICON = {
+  cash:   Banknote,
+  card:   CreditCard,
+  click:  CreditCard,
+  payme:  CreditCard,
+  uzum:   CreditCard,
+  wallet: Wallet,
 };
 
 const POLL_MS = 15000;
@@ -60,9 +69,17 @@ function courierName(o) {
   return (o.courier && o.courier.name) || o.courier_name ||
     (o.courier_id != null ? `Kuryer #${o.courier_id}` : null);
 }
-function payMethod(m) {
-  if (!m) return '—';
-  return PAY_METHOD[String(m).toLowerCase()] || m;
+function PayMethod({ method }) {
+  if (!method) return '—';
+  const key = String(method).toLowerCase();
+  const Icon = PAY_ICON[key];
+  const label = PAY_METHOD[key] || method;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      {Icon ? <Icon size={14} /> : null}
+      {label}
+    </span>
+  );
 }
 function payStatusOf(o) {
   const key = o.payment_status ? String(o.payment_status).toLowerCase() : '';
@@ -296,7 +313,7 @@ export default function Orders() {
         </div>
       ) : orders.length === 0 ? (
         <div className={s.stateBox}>
-          <div className={s.stateEmoji}>📦</div>
+          <div className={s.stateEmoji}><Package size={48} /></div>
           <div className={s.stateTitle}>Buyurtmalar yo'q</div>
           <div className={s.stateText}>Hozircha birorta buyurtma yo'q. Yangi buyurtmalar shu yerda paydo bo'ladi.</div>
           <button className="btn btn-secondary" onClick={() => load()}>Yangilash</button>
@@ -339,7 +356,7 @@ export default function Orders() {
                     <td className={s.mono}>{formatSum(o.total)}</td>
                     <td>
                       <div className={s.payCell}>
-                        <span className={s.payMethod}>{payMethod(o.payment_method)}</span>
+                        <span className={s.payMethod}><PayMethod method={o.payment_method} /></span>
                         {ps.meta && (
                           <span className={s.payStatus} style={{ background: ps.meta.bg, color: ps.meta.color }}>
                             {ps.meta.label}
@@ -395,7 +412,7 @@ export default function Orders() {
                       <div className={s.infoItem}><span className={s.infoLabel}>Mijoz</span><span>{customerName(selected)}</span></div>
                       <div className={s.infoItem}><span className={s.infoLabel}>Restoran</span><span>{vendorName(selected, vmap)}</span></div>
                       <div className={s.infoItem}><span className={s.infoLabel}>Kuryer</span><span>{courier || 'Tayinlanmagan'}</span></div>
-                      <div className={s.infoItem}><span className={s.infoLabel}>To'lov usuli</span><span>{payMethod(selected.payment_method)}</span></div>
+                      <div className={s.infoItem}><span className={s.infoLabel}>To'lov usuli</span><span><PayMethod method={selected.payment_method} /></span></div>
                       <div className={s.infoItem}>
                         <span className={s.infoLabel}>To'lov holati</span>
                         <span>{ps.meta ? ps.meta.label : (selected.payment_status || '—')}</span>

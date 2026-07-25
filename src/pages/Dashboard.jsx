@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ShoppingBag, Wallet, Store, Users, Clock,
   RefreshCw, AlertCircle, Eye,
+  TrendingUp, ChartPie, Package,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -153,10 +154,10 @@ function ErrorState({ message, onRetry, compact }) {
   );
 }
 
-function EmptyState({ emoji, title, text }) {
+function EmptyState({ icon: Icon, title, text }) {
   return (
     <div className="empty-state">
-      <div className="empty-state__emoji">{emoji}</div>
+      <div className="empty-state__emoji">{Icon ? <Icon size={48} /> : null}</div>
       <div className="empty-state__title">{title}</div>
       {text && <div className="empty-state__text">{text}</div>}
     </div>
@@ -194,10 +195,10 @@ function KpiCard({ loading, error, onRetry, icon: Icon, color, bg, label, value,
 }
 
 /** Chart/jadval bloklari uchun 3 holatli o'ram. */
-function AsyncBlock({ loading, error, onRetry, isEmpty, emptyEmoji, emptyTitle, emptyText, skeleton, children }) {
+function AsyncBlock({ loading, error, onRetry, isEmpty, emptyIcon, emptyTitle, emptyText, skeleton, children }) {
   if (loading) return skeleton;
   if (error) return <ErrorState message={error} onRetry={onRetry} />;
-  if (isEmpty) return <EmptyState emoji={emptyEmoji} title={emptyTitle} text={emptyText} />;
+  if (isEmpty) return <EmptyState icon={emptyIcon} title={emptyTitle} text={emptyText} />;
   return children;
 }
 
@@ -324,7 +325,7 @@ export default function Dashboard() {
           <AsyncBlock
             loading={orders.loading} error={orders.error} onRetry={loadOrders}
             isEmpty={orders.list.length === 0}
-            emptyEmoji="📈" emptyTitle="Ma'lumot yo'q"
+            emptyIcon={TrendingUp} emptyTitle="Ma'lumot yo'q"
             emptyText="Buyurtmalar paydo bo'lgach, dinamika shu yerda ko'rinadi."
             skeleton={<div className={`skeleton ${s.chartSkeleton}`} />}
           >
@@ -355,7 +356,7 @@ export default function Dashboard() {
           <AsyncBlock
             loading={orders.loading} error={orders.error} onRetry={loadOrders}
             isEmpty={statusDist.length === 0}
-            emptyEmoji="🍩" emptyTitle="Ma'lumot yo'q"
+            emptyIcon={ChartPie} emptyTitle="Ma'lumot yo'q"
             emptyText="Buyurtmalar bo'lmagani uchun taqsimot yo'q."
             skeleton={<div className={`skeleton ${s.chartSkeleton}`} />}
           >
@@ -400,7 +401,7 @@ export default function Dashboard() {
         <AsyncBlock
           loading={orders.loading} error={orders.error} onRetry={loadOrders}
           isEmpty={recentOrders.length === 0}
-          emptyEmoji="📦" emptyTitle="Buyurtmalar yo'q"
+          emptyIcon={Package} emptyTitle="Buyurtmalar yo'q"
           emptyText="Hozircha buyurtmalar mavjud emas. Yangilari shu yerda ko'rinadi."
           skeleton={<TableSkeleton />}
         >

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import BrandMark from './components/BrandMark';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -22,7 +23,9 @@ function Splash() {
         background: 'var(--color-bg-secondary)',
       }}
     >
-      <div style={{ fontSize: 40, animation: 'bx-pulse 1.4s var(--ease) infinite' }}>🐝</div>
+      <div style={{ animation: 'bx-pulse 1.4s var(--ease) infinite', lineHeight: 0 }}>
+        <BrandMark size={56} />
+      </div>
     </div>
   );
 }

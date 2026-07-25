@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   CreditCard, ScrollText, RotateCcw, RefreshCw, User, Hash, FileText,
+  AlertTriangle, ClipboardList,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatSum, formatDateTime, statusLabel } from '../lib/helpers';
@@ -96,7 +97,7 @@ function useListLoader(fetchFn) {
 function ErrorState({ message, onRetry }) {
   return (
     <div className="empty-state">
-      <div className="empty-state__emoji">⚠️</div>
+      <div className="empty-state__emoji"><AlertTriangle size={48} color="var(--color-error)" /></div>
       <div className="empty-state__title">Xatolik yuz berdi</div>
       <div className="empty-state__text">{message}</div>
       <button className="btn btn-primary" onClick={onRetry}>Qayta urinish</button>
@@ -156,7 +157,7 @@ function PaymentsTab() {
     return (
       <div className="card">
         <div className="empty-state">
-          <div className="empty-state__emoji">💳</div>
+          <div className="empty-state__emoji"><CreditCard size={48} /></div>
           <div className="empty-state__title">To'lovlar yo'q</div>
           <div className="empty-state__text">Hozircha to'lovlar ro'yxati bo'sh. Yangi to'lovlar shu yerda ko'rinadi.</div>
         </div>
@@ -313,7 +314,7 @@ function AuditsTab() {
     return (
       <div className="card">
         <div className="empty-state">
-          <div className="empty-state__emoji">📋</div>
+          <div className="empty-state__emoji"><ClipboardList size={48} /></div>
           <div className="empty-state__title">Audit yozuvlari yo'q</div>
           <div className="empty-state__text">Tizimdagi harakatlar shu yerda qayd etiladi. Hozircha yozuv yo'q.</div>
         </div>

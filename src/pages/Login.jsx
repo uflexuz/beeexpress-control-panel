@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import BrandMark from '../components/BrandMark';
 import s from './Login.module.css';
 
 /** Faqat raqamlarni qoldiradi, 998 prefiksini olib tashlaydi, 9 raqamgacha kesadi. */
@@ -60,7 +61,7 @@ export default function Login() {
     <div className={s.page}>
       <div className={s.card}>
         <div className={s.brand}>
-          <div className={s.brandMark}>🐝</div>
+          <BrandMark size={64} className={s.brandMark} />
           <h1 className={s.title}>Bee Express Admin</h1>
           <p className={s.subtitle}>Boshqaruv paneliga kirish</p>
         </div>
